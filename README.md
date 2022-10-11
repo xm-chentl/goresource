@@ -1,0 +1,2 @@
+# goresource
+resource
