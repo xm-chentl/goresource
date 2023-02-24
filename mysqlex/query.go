@@ -90,6 +90,9 @@ func (q *query) First(res interface{}) (err error) {
 		q.db.Where(q.whereSql, q.whereArgs...)
 	}
 	err = q.db.First(res).Error
+	if err == gorm.ErrRecordNotFound {
+		err = nil
+	}
 
 	return
 }
