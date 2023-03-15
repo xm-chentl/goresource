@@ -60,14 +60,7 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 	defer q.reset()
 
 	resRt := reflect.TypeOf(res)
-	if resRt.Kind() == reflect.Ptr {
-		if resRt.Elem().Kind() == reflect.Slice {
-			resRt = resRt.Elem().Elem()
-		} else {
-			err = errs.ResIsNotSlice
-			return
-		}
-	} else {
+	if resRt.Kind() != reflect.Ptr {
 		err = errs.ResIsNotPtr
 		return
 	}
@@ -81,8 +74,8 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		q.db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
 	}
 
-	entryRt := resRt.Elem()
-	err = q.db.Model(reflect.New(entryRt).Interface()).Find(res).Error
+	resRt = resRt.Elem()
+	err = q.db.Model(reflect.New(resRt).Interface()).Find(res).Error
 
 	return
 }
