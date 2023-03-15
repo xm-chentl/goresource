@@ -60,8 +60,15 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 	defer q.reset()
 
 	resRt := reflect.TypeOf(res)
-	if resRt.Kind() != reflect.Slice {
-		err = errs.ResIsNotSlice
+	if resRt.Kind() == reflect.Ptr {
+		if resRt.Elem().Kind() == reflect.Slice {
+			resRt = resRt.Elem().Elem()
+		} else {
+			err = errs.ResIsNotSlice
+			return
+		}
+	} else {
+		err = errs.ResIsNotPtr
 		return
 	}
 	if q.order != "" {
@@ -82,14 +89,15 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 
 func (q *query) First(res interface{}) (err error) {
 	defer q.reset()
-
+	db := q.db
 	if q.order != "" {
-		q.db.Order(q.order)
+		db = q.db.Order(q.order)
 	}
 	if q.whereSql != "" {
-		q.db.Where(q.whereSql, q.whereArgs...)
+		db = q.db.Where(q.whereSql, q.whereArgs...)
 	}
-	err = q.db.First(res).Error
+
+	err = db.First(res).Error
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	}

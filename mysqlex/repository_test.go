@@ -30,6 +30,29 @@ func (m TestPerson) TableName() string {
 	return m.Table()
 }
 
+type TestIdentity struct {
+	ID   uint64 `gorm:"column:id;AUTO_INCREMENT;primaryKey"`
+	Name string `gorm:column:"name"`
+}
+
+func (m TestIdentity) GetID() interface{} {
+	return m.ID
+}
+
+func (m *TestIdentity) SetID(v interface{}) {
+	if v != nil {
+		m.ID = v.(uint64)
+	}
+}
+
+func (m TestIdentity) Table() string {
+	return "test_identity"
+}
+
+func (m TestIdentity) TableName() string {
+	return m.Table()
+}
+
 func Test_Create(test *testing.T) {
 	db, repoDb := getDb()
 	test.Run("success", func(t *testing.T) {
@@ -49,6 +72,25 @@ func Test_Create(test *testing.T) {
 		}
 		if newEntry.ID != entry.ID {
 			t.Fatal("err")
+		}
+		_ = db.Model(entry).Delete(entry).Error
+	})
+
+	test.Run("identity success", func(t *testing.T) {
+		var err error
+		entry := TestIdentity{
+			Name: "tenglong.chen",
+		}
+		if err = repoDb.Create(&entry); err != nil {
+			t.Fatal(err)
+		}
+		if entry.ID == 0 {
+			t.Fatal("identity id is empty")
+		}
+
+		newEntry := TestIdentity{}
+		if err = db.Model(&newEntry).Where("id = ?", entry.ID).First(&newEntry).Error; err != nil {
+			t.Fatal(err)
 		}
 		_ = db.Model(entry).Delete(entry).Error
 	})
