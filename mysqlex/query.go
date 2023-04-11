@@ -23,10 +23,11 @@ type query struct {
 func (q *query) Count(entry goresource.IDbModel) (count int64, err error) {
 	defer q.reset()
 
+	db := q.db
 	if q.whereSql != "" {
-		q.db.Where(q.whereSql, q.whereArgs...)
+		db = q.db.Where(q.whereSql, q.whereArgs...)
 	}
-	err = q.db.Model(entry).Count(&count).Error
+	err = db.Model(entry).Count(&count).Error
 
 	return
 }
@@ -64,18 +65,19 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		err = errs.ResIsNotPtr
 		return
 	}
+	db := q.db
 	if q.order != "" {
-		q.db.Order(q.order)
+		db = q.db.Order(q.order)
 	}
 	if q.whereSql != "" {
-		q.db.Where(q.whereSql, q.whereArgs...)
+		db = q.db.Where(q.whereSql, q.whereArgs...)
 	}
 	if q.page > 0 && q.pageSize > 0 {
-		q.db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
+		db = q.db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
 	}
 
 	resRt = resRt.Elem()
-	err = q.db.Model(reflect.New(resRt).Interface()).Find(res).Error
+	err = db.Model(reflect.New(resRt).Interface()).Find(res).Error
 
 	return
 }
