@@ -69,6 +69,6 @@ func New(dsn string, configs ...Config) goresource.IResource {
 
 	return &resource{
 		dsn: dsn,
-		db:  db,
+		db:  db.Debug(),
 	}
 }

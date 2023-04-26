@@ -1,6 +1,7 @@
 package mysqlex
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -25,7 +26,7 @@ func (q *query) Count(entry goresource.IDbModel) (count int64, err error) {
 
 	db := q.db
 	if q.whereSql != "" {
-		db = q.db.Where(q.whereSql, q.whereArgs...)
+		db = db.Where(q.whereSql, q.whereArgs...)
 	}
 	err = db.Model(entry).Count(&count).Error
 
@@ -65,15 +66,17 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		err = errs.ResIsNotPtr
 		return
 	}
+
+	fmt.Println("query.find >", q.whereSql, q.whereArgs)
 	db := q.db
 	if q.order != "" {
-		db = q.db.Order(q.order)
+		db = db.Order(q.order)
 	}
 	if q.whereSql != "" {
-		db = q.db.Where(q.whereSql, q.whereArgs...)
+		db = db.Where(q.whereSql, q.whereArgs...)
 	}
 	if q.page > 0 && q.pageSize > 0 {
-		db = q.db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
+		db = db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
 	}
 
 	resRt = resRt.Elem()
@@ -86,10 +89,10 @@ func (q *query) First(res interface{}) (err error) {
 	defer q.reset()
 	db := q.db
 	if q.order != "" {
-		db = q.db.Order(q.order)
+		db = db.Order(q.order)
 	}
 	if q.whereSql != "" {
-		db = q.db.Where(q.whereSql, q.whereArgs...)
+		db = db.Where(q.whereSql, q.whereArgs...)
 	}
 
 	err = db.First(res).Error
