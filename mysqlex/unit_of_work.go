@@ -31,7 +31,11 @@ func (u unitOfWork) Commit() (err error) {
 					return
 				}
 			} else if item.rt == repositorytype.Delete {
-				if txErr = tx.Model(item.entry).Delete(item.entry).Error; txErr != nil {
+				args := item.args
+				if args == nil {
+					args = make([]interface{}, 0)
+				}
+				if txErr = tx.Model(item.entry).Delete(item.entry, args...).Error; txErr != nil {
 					return
 				}
 			} else if item.rt == repositorytype.Update {

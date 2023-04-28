@@ -1,7 +1,6 @@
 package mysqlex
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -67,7 +66,6 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		return
 	}
 
-	fmt.Println("query.find >", q.whereSql, q.whereArgs)
 	db := q.db
 	if q.order != "" {
 		db = db.Order(q.order)
@@ -105,7 +103,7 @@ func (q *query) First(res interface{}) (err error) {
 
 func (q *query) Asc(fields ...string) goresource.IQuery {
 	if len(fields) > 0 {
-		q.genOrder("ASC", fields...)
+		q.genOrder(" ASC", fields...)
 	}
 
 	return q
@@ -113,7 +111,7 @@ func (q *query) Asc(fields ...string) goresource.IQuery {
 
 func (q *query) Desc(fields ...string) goresource.IQuery {
 	if len(fields) > 0 {
-		q.genOrder("DESC", fields...)
+		q.genOrder(" DESC", fields...)
 	}
 
 	return q

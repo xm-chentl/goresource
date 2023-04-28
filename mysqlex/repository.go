@@ -1,6 +1,8 @@
 package mysqlex
 
 import (
+	"fmt"
+
 	"github.com/xm-chentl/goresource"
 	"github.com/xm-chentl/goresource/dbtype"
 	"github.com/xm-chentl/goresource/repositorytype"
@@ -27,6 +29,8 @@ func (r repository) Create(entry goresource.IDbModel) (err error) {
 	}
 
 	err = r.db.Model(entry).Create(entry).Error
+	fmt.Println(">>>", entry.GetID())
+
 	return
 }
 
@@ -35,6 +39,7 @@ func (r repository) Delete(entry goresource.IDbModel, args ...interface{}) (err 
 		r.uow.commitQueues = append(r.uow.commitQueues, commitQueueItem{
 			rt:    repositorytype.Delete,
 			entry: entry,
+			args:  args,
 		})
 		if r.repositoryBase != nil {
 			r.repositoryBase.SetUow(dbtype.MySQL, r.uow)
