@@ -152,9 +152,9 @@ func (q *query) Where(args ...interface{}) goresource.IQuery {
 
 func (q *query) genOrder(suffix string, fields ...string) {
 	if q.order == "" {
-		q.order = strings.Join(fields, ", ") + suffix
+		q.order = strings.Join(fields, ", ") + " " + suffix
 	} else {
-		q.order = q.order + ", " + strings.Join(fields, ", ") + suffix
+		q.order = q.order + ", " + strings.Join(fields, ", ") + " " + suffix
 	}
 }
 
