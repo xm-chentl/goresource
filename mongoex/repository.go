@@ -18,7 +18,7 @@ type repository struct {
 	uow            *unitOfWork
 }
 
-func (r *repository) Create(entry goresource.IDbModel) (err error) {
+func (r *repository) Create(entry goresource.IDbModel, args ...interface{}) (err error) {
 	if v, ok := entry.GetID().(primitive.ObjectID); ok {
 		if v.IsZero() {
 			entry.SetID(primitive.NewObjectID())
@@ -102,5 +102,6 @@ func (r *repository) Query() goresource.IQuery {
 		filter:   bson.M{},
 		orders:   make([]string, 0),
 		orderBy:  make([]string, 0),
+		opts:     make([]IOption, 0),
 	}
 }

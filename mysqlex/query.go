@@ -18,16 +18,24 @@ type query struct {
 	whereSql  string
 	page      int
 	pageSize  int
+	opts      []interface{}
 }
 
 func (q *query) Count(entry goresource.IDbModel) (count int64, err error) {
 	defer q.reset()
 
-	db := q.db
+	db := q.db.Model(entry)
 	if q.whereSql != "" {
 		db = db.Where(q.whereSql, q.whereArgs...)
 	}
-	err = db.Model(entry).Count(&count).Error
+	if len(q.opts) > 0 {
+		for _, o := range q.opts {
+			if v, ok := o.(IOption); ok {
+				db = v.Apply(db)
+			}
+		}
+	}
+	err = db.Count(&count).Error
 
 	return
 }
@@ -57,7 +65,7 @@ func (q *query) Fields(args ...interface{}) goresource.IQuery {
 	return q
 }
 
-func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err error) {
+func (q *query) Find(res interface{}) (err error) {
 	defer q.reset()
 
 	resRt := reflect.TypeOf(res)
@@ -66,7 +74,8 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		return
 	}
 
-	db := q.db
+	resRt = resRt.Elem()
+	db := q.db.Model(reflect.New(resRt).Interface())
 	if q.order != "" {
 		db = db.Order(q.order)
 	}
@@ -76,9 +85,15 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 	if q.page > 0 && q.pageSize > 0 {
 		db = db.Offset((q.page - 1) * q.pageSize).Limit(q.pageSize)
 	}
+	if len(q.opts) > 0 {
+		for _, o := range q.opts {
+			if v, ok := o.(IOption); ok {
+				db = v.Apply(db)
+			}
+		}
+	}
 
-	resRt = resRt.Elem()
-	err = db.Model(reflect.New(resRt).Interface()).Find(res).Error
+	err = db.Find(res).Error
 
 	return
 }
@@ -91,6 +106,13 @@ func (q *query) First(res interface{}) (err error) {
 	}
 	if q.whereSql != "" {
 		db = db.Where(q.whereSql, q.whereArgs...)
+	}
+	if len(q.opts) > 0 {
+		for _, o := range q.opts {
+			if v, ok := o.(IOption); ok {
+				db = v.Apply(db)
+			}
+		}
 	}
 
 	err = db.First(res).Error
@@ -144,6 +166,16 @@ func (q *query) Where(args ...interface{}) goresource.IQuery {
 		q.whereSql = args[0].(string)
 		if len(args) > 1 {
 			q.whereArgs = args[1:]
+		}
+	}
+
+	return q
+}
+
+func (q *query) SetOpts(opts ...interface{}) goresource.IQuery {
+	for _, o := range opts {
+		if o != nil {
+			q.opts = opts
 		}
 	}
 

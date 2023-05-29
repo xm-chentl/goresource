@@ -9,7 +9,7 @@ import (
 type TestPerson struct {
 	Name string `gorm:"column:name"`
 	ID   int64  `gorm:"column:id;primaryKey"`
-	Age  int8   `gorm:column:age"`
+	Age  int8   `gorm:"column:age"`
 }
 
 func (m TestPerson) GetID() interface{} {
@@ -32,7 +32,7 @@ func (m TestPerson) TableName() string {
 
 type TestIdentity struct {
 	ID   uint64 `gorm:"column:id;AUTO_INCREMENT;primaryKey"`
-	Name string `gorm:column:"name"`
+	Name string `gorm:"column:name"`
 }
 
 func (m TestIdentity) GetID() interface{} {
@@ -213,9 +213,7 @@ func Test_Update(test *testing.T) {
 			Name: "minghao.chen",
 			Age:  11,
 		}
-		if err = repoDb.Update(&updateEntry, SaveOptionByOmit{
-			Fields: []string{"age"},
-		}); err != nil {
+		if err = repoDb.Update(&updateEntry, NewOptionSaveOmit("age")); err != nil {
 			t.Fatal(err)
 		}
 

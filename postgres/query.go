@@ -25,6 +25,7 @@ type query struct {
 	pageSize  int
 	orders    []string
 	orderBys  []string
+	opts      []interface{}
 }
 
 func (q *query) Count(entry goresource.IDbModel) (res int64, err error) {
@@ -111,7 +112,7 @@ func (q query) First(res interface{}) (err error) {
 	return
 }
 
-func (q query) Find(res interface{}, opts ...goresource.IFindOptions) (err error) {
+func (q query) Find(res interface{}) (err error) {
 	resRt := reflect.TypeOf(res)
 	resRv := reflect.ValueOf(res)
 	if resRt.Kind() == reflect.Ptr {
@@ -176,6 +177,16 @@ func (q *query) Asc(fields ...string) goresource.IQuery {
 func (q *query) Desc(fields ...string) goresource.IQuery {
 	for _, field := range fields {
 		q.orderBys = append(q.orderBys, fmt.Sprintf(`"%s"`, field))
+	}
+
+	return q
+}
+
+func (q *query) SetOpts(opts ...interface{}) goresource.IQuery {
+	for _, o := range opts {
+		if o != nil {
+			q.opts = opts
+		}
 	}
 
 	return q

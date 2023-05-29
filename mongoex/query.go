@@ -22,6 +22,7 @@ type query struct {
 	pageSize   int
 	orders     []string // 1
 	orderBy    []string // -1
+	opts       []IOption
 }
 
 func (q *query) Asc(fields ...string) goresource.IQuery {
@@ -70,7 +71,7 @@ func (q *query) Fields(args ...interface{}) goresource.IQuery {
 	return q
 }
 
-func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err error) {
+func (q *query) Find(res interface{}) (err error) {
 	defer q.reset()
 
 	resRt := reflect.TypeOf(res)
@@ -87,17 +88,11 @@ func (q *query) Find(res interface{}, opts ...goresource.IFindOptions) (err erro
 		return
 	}
 
-	var collectionOptions *CollectionOptions
-	for _, opt := range opts {
-		if v, ok := opt.(*CollectionOptions); ok {
-			collectionOptions = v
-		}
-	}
-
 	var collectionDb *mongo.Collection
-	if collectionOptions != nil {
-		collectionDb = q.database.Collection(collectionOptions.Name)
-	} else {
+	for _, opt := range q.opts {
+		collectionDb = opt.Apply(q.database)
+	}
+	if collectionDb == nil {
 		newEntry := reflect.New(resRt).Interface().(goresource.IDbModel)
 		collectionDb = q.database.Collection(newEntry.Table())
 	}
@@ -220,6 +215,10 @@ func (q *query) Where(args ...interface{}) goresource.IQuery {
 		q.filter = args[0].(bson.M)
 	}
 
+	return q
+}
+
+func (q *query) SetOpts(opts ...interface{}) goresource.IQuery {
 	return q
 }
 

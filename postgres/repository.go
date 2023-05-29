@@ -19,7 +19,7 @@ type repository struct {
 	uow            *unitOfWork
 }
 
-func (r *repository) Create(entry goresource.IDbModel) (err error) {
+func (r *repository) Create(entry goresource.IDbModel, args ...interface{}) (err error) {
 	sql, args := grammar.Insert(metadata.Get(entry), entry)
 	if r.uow != nil {
 		r.uow.addQueue(sql, args...)
