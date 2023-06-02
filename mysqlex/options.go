@@ -10,16 +10,16 @@ type IOption interface {
 	Apply(*gorm.DB) *gorm.DB
 }
 
-type OptionQuerySelect struct {
+type OptionSelectField struct {
 	Fields []string
 }
 
-func (s OptionQuerySelect) Apply(db *gorm.DB) *gorm.DB {
+func (s OptionSelectField) Apply(db *gorm.DB) *gorm.DB {
 	return db.Select(s.Fields)
 }
 
-func NewOptionQuerySelect(fields ...string) IOption {
-	return &OptionQuerySelect{
+func NewOptionSelectField(fields ...string) IOption {
+	return &OptionSelectField{
 		Fields: fields,
 	}
 }
