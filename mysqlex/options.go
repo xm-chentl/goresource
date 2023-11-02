@@ -10,6 +10,26 @@ type IOption interface {
 	Apply(*gorm.DB) *gorm.DB
 }
 
+type OptionGroupBy struct {
+	Fields []string
+}
+
+func (g OptionGroupBy) Apply(db *gorm.DB) *gorm.DB {
+	if len(g.Fields) > 0 {
+		for _, f := range g.Fields {
+			db = db.Group(f)
+		}
+	}
+
+	return db
+}
+
+func NewOptionGroupBy(fields ...string) IOption {
+	return &OptionGroupBy{
+		Fields: fields,
+	}
+}
+
 type OptionSelectField struct {
 	Fields []string
 }
