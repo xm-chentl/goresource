@@ -33,7 +33,7 @@ func (f *resource) Db(args ...interface{}) goresource.IRepository {
 		}
 	}
 	if repo.db == nil {
-		repo.db = f.db
+		repo.db = f.db.Debug()
 	}
 
 	return repo
@@ -69,6 +69,6 @@ func New(dsn string, configs ...Config) goresource.IResource {
 
 	return &resource{
 		dsn: dsn,
-		db:  db.Debug(),
+		db:  db,
 	}
 }

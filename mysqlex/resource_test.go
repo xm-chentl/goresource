@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var testConnectionStr = "root:860802@tcp(47.98.248.82:9902)/my_test"
+var testConnectionStr = "root:123456@tcp(localhost:3306)/test_db"
 var testDb *gorm.DB
 
 func Test_Connection(t *testing.T) {

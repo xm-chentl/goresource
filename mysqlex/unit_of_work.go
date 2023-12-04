@@ -60,7 +60,7 @@ func (u unitOfWork) Commit() (err error) {
 					return
 				}
 			} else if item.rt == repositorytype.Update {
-				if txErr = tx.Model(item.entry).Updates(item.entry).Error; txErr != nil {
+				if txErr = tx.Model(item.entry).Save(item.entry).Error; txErr != nil {
 					return
 				}
 			}
