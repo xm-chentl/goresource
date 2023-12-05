@@ -72,7 +72,7 @@ func (r repository) Update(entry goresource.IDbModel, args ...interface{}) (err 
 
 		return
 	}
-	err = db.Updates(entry).Error
+	err = db.Model(entry).Save(entry).Error
 
 	return
 }
