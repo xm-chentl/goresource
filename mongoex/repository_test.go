@@ -30,9 +30,34 @@ func (t *testPerson) SetID(v interface{}) {
 	}
 }
 
+type modelIDString struct {
+	ID primitive.ObjectID `bson:"_id" json:"id"`
+}
+
+func (m modelIDString) GetID() interface{} {
+	return m.ID
+}
+
+func (m *modelIDString) SetID(v interface{}) {
+	if idv, ok := v.(primitive.ObjectID); ok {
+		m.ID = idv
+	}
+}
+
+type objectEntry2 struct {
+	modelIDString `bson:",inline"`
+
+	Desc string `bson:"desc"`
+}
+
+func (m objectEntry2) Table() string {
+	return "object_entry_2"
+}
+
 type objectEntry struct {
-	ID   primitive.ObjectID `bson:"_id"`
-	Desc string             `bson:"desc"`
+	ID primitive.ObjectID `bson:"_id" json:"id"`
+
+	Desc string `bson:"desc"`
 }
 
 func (m objectEntry) Table() string {
@@ -48,7 +73,6 @@ func (m *objectEntry) SetID(v interface{}) {
 }
 
 func Test_repository_Create(test *testing.T) {
-
 	repo, err := getClient()
 	if err != nil {
 		test.Fatal("err", err)
@@ -108,6 +132,33 @@ func Test_repository_Create(test *testing.T) {
 
 		a := assert.New(t)
 		a.Equal(addEntry, queryEntry)
+	})
+
+	test.Run("primitive.objectID.create_inline", func(t *testing.T) {
+		addEntry := objectEntry2{
+			Desc: "test_object_id_2",
+		}
+		if err = repo.Create(&addEntry); err != nil {
+			t.Fatal(err, err)
+		}
+
+		db := repo.database.Collection(addEntry.Table())
+		defer func() {
+			_, _ = db.DeleteOne(context.Background(), bson.M{"_id": addEntry.ID})
+		}()
+
+		res := db.FindOne(context.Background(), bson.M{"_id": addEntry.ID})
+		if res.Err() != nil {
+			t.Fatal("err", res.Err())
+		}
+
+		queryEntry := objectEntry2{}
+		if err = res.Decode(&queryEntry); err != nil {
+			t.Fatal("err", err)
+		}
+		if !addEntry.ID.IsZero() {
+			t.Fatal("err")
+		}
 	})
 }
 
