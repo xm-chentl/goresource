@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/xm-chentl/goresource/errs"
 	"github.com/xm-chentl/goresource/postgres/grammar"
 	"github.com/xm-chentl/goresource/postgres/metadata"
-	"github.com/xm-chentl/goresource/errs"
 
 	"github.com/stretchr/testify/assert"
 )

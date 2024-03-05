@@ -54,6 +54,16 @@ func (m objectEntry2) Table() string {
 	return "object_entry_2"
 }
 
+type objectEntry3 struct {
+	modelIDString `bson:",inline"`
+
+	Desc string `bson:"desc"`
+}
+
+func (m objectEntry3) Table() string {
+	return "object_entry_2"
+}
+
 type objectEntry struct {
 	ID primitive.ObjectID `bson:"_id" json:"id"`
 

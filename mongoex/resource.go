@@ -39,7 +39,7 @@ func (f resource) Db(args ...interface{}) goresource.IRepository {
 }
 
 func (f resource) Uow() goresource.IUnitOfWork {
-	return nil
+	return newUnitOfWork(f.database)
 }
 
 func New(dbName, dsn string) goresource.IResource {

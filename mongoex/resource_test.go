@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	testConnStr = "mongodb://47.98.248.82:9901"
+	testConnStr = "mongodb://localhost:27017"
 )
 
 func Test_Factory_NewFactory(test *testing.T) {
