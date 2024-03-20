@@ -3,7 +3,6 @@ package mongoex
 import (
 	"context"
 	"sync"
-	"time"
 
 	"github.com/xm-chentl/goresource"
 
@@ -200,67 +199,67 @@ func (u *unitOfWork) commitBySingle() (err error) {
 }
 
 // todo: 副本集使用方式
-func (u *unitOfWork) commit2() (err error) {
-	defer u.reset()
+// func (u *unitOfWork) commit2() (err error) {
+// 	defer u.reset()
 
-	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancle()
+// 	ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancle()
 
-	session, err := u.database.Client().StartSession()
-	if err != nil {
-		return
-	}
-	defer session.EndSession(context.TODO())
+// 	session, err := u.database.Client().StartSession()
+// 	if err != nil {
+// 		return
+// 	}
+// 	defer session.EndSession(context.TODO())
 
-	sessionCtx := mongo.NewSessionContext(ctx, session)
-	if err = session.StartTransaction(); err != nil {
-		return
-	}
-	defer func() {
-		if err != nil {
-			_ = session.AbortTransaction(context.Background())
-		}
-	}()
+// 	sessionCtx := mongo.NewSessionContext(ctx, session)
+// 	if err = session.StartTransaction(); err != nil {
+// 		return
+// 	}
+// 	defer func() {
+// 		if err != nil {
+// 			_ = session.AbortTransaction(context.Background())
+// 		}
+// 	}()
 
-	var collectionDb *mongo.Collection
-	for index := range u.createQueue {
-		item := u.createQueue[index]
-		collectionDb = u.getCollection(item.entry)
-		_, err = collectionDb.InsertOne(sessionCtx, item.entry)
-		if err != nil {
-			return
-		}
-	}
-	for index := range u.deleteQueue {
-		item := u.deleteQueue[index]
-		collectionDb = u.getCollection(item.entry)
-		if item.args != nil {
-			_, err = collectionDb.DeleteOne(sessionCtx, item.args)
-		} else {
-			_, err = collectionDb.DeleteOne(sessionCtx, bson.M{"_id": item.entry.GetID()})
-		}
-		if err != nil {
-			return
-		}
-	}
-	for index := range u.updateQueue {
-		item := u.updateQueue[index]
-		collectionDb = u.getCollection(item.entry)
-		if item.args != nil {
-			_, err = collectionDb.UpdateOne(sessionCtx, bson.M{"_id": item.entry.GetID()}, item.args)
-		} else {
-			_, err = collectionDb.UpdateOne(sessionCtx, bson.M{"_id": item.entry.GetID()}, bson.M{"$set": item.entry})
-		}
-		if err != nil {
-			return
-		}
-	}
-	if err != nil {
-		return
-	}
+// 	var collectionDb *mongo.Collection
+// 	for index := range u.createQueue {
+// 		item := u.createQueue[index]
+// 		collectionDb = u.getCollection(item.entry)
+// 		_, err = collectionDb.InsertOne(sessionCtx, item.entry)
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	for index := range u.deleteQueue {
+// 		item := u.deleteQueue[index]
+// 		collectionDb = u.getCollection(item.entry)
+// 		if item.args != nil {
+// 			_, err = collectionDb.DeleteOne(sessionCtx, item.args)
+// 		} else {
+// 			_, err = collectionDb.DeleteOne(sessionCtx, bson.M{"_id": item.entry.GetID()})
+// 		}
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	for index := range u.updateQueue {
+// 		item := u.updateQueue[index]
+// 		collectionDb = u.getCollection(item.entry)
+// 		if item.args != nil {
+// 			_, err = collectionDb.UpdateOne(sessionCtx, bson.M{"_id": item.entry.GetID()}, item.args)
+// 		} else {
+// 			_, err = collectionDb.UpdateOne(sessionCtx, bson.M{"_id": item.entry.GetID()}, bson.M{"$set": item.entry})
+// 		}
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	if err != nil {
+// 		return
+// 	}
 
-	return
-}
+// 	return
+// }
 
 func newUnitOfWork(database *mongo.Database) *unitOfWork {
 	return &unitOfWork{
