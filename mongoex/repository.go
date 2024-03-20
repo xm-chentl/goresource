@@ -20,7 +20,7 @@ type repository struct {
 
 func (r *repository) Create(entry goresource.IDbModel, args ...interface{}) (err error) {
 	if v, ok := entry.GetID().(primitive.ObjectID); ok {
-		if v.IsZero() {
+		if v.Hex() == "" || v.IsZero() {
 			entry.SetID(primitive.NewObjectID())
 		}
 	}
